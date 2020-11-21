@@ -3,40 +3,30 @@ package alpaca.client
 import alpaca.dto._
 import alpaca.dto.algebra.Bars
 import alpaca.dto.request.OrderRequest
-import alpaca.service.{ConfigService, HammockService, Parameter}
-import cats.effect.IO
+import alpaca.service.{ConfigService, HTTPService}
 import com.typesafe.scalalogging.Logger
-import hammock._
-import hammock.circe.implicits._
-import hammock.jvm.Interpreter
-import hammock.marshalling._
-import io.circe.generic.auto._
+
+import scala.concurrent.Future
 
 private[alpaca] class AlpacaClient(configService: ConfigService,
-                                   hammockService: HammockService) {
+                                   httpService: HTTPService) {
 
-  val logger = Logger(classOf[AlpacaClient])
+  private val logger: Logger = Logger(classOf[AlpacaClient])
 
-  def getAccount: IO[Account] = {
-    hammockService.execute[Account, Unit](
-      Method.GET,
-      configService.getConfig.value.account_url)
-  }
+  def getAccount: Future[Account] =
+    httpService.executeGet[Account, Unit](configService.getConfig.account_url)
 
-  def getAsset(symbol: String): IO[Assets] = {
-    hammockService.execute[Assets, Unit](
-      Method.GET,
-      s"${configService.getConfig.value.assets_url}/$symbol")
-  }
+  def getAsset(symbol: String): Future[Assets] =
+    httpService.executeGet[Assets, Unit](s"${configService.getConfig.assets_url}/$symbol")
 
   def getAssets(status: Option[String] = None,
-                asset_class: Option[String] = None): IO[List[Assets]] = {
-    hammockService.execute[List[Assets], Unit](
-      Method.GET,
-      configService.getConfig.value.assets_url,
-      None,
-      hammockService.createTuples(Parameter("status", status),
-                                  Parameter("asset_class", asset_class)))
+                asset_class: Option[String] = None): Future[List[Assets]] = {
+    httpService.executeGet[List[Assets], Unit](
+      configService.getConfig.assets_url,
+      httpService.createTuples(
+        Parameter("status", status),
+        Parameter("asset_class", asset_class))
+    )
   }
 
   def getBars(timeframe: String,
@@ -45,16 +35,10 @@ private[alpaca] class AlpacaClient(configService: ConfigService,
               start: Option[String] = None,
               end: Option[String] = None,
               after: Option[String] = None,
-              until: Option[String] = None): IO[Bars] = {
-
-    val url = s"${configService.getConfig.value.bars_url}/$timeframe"
-
-    hammockService.execute[Bars, Unit](
-      Method.GET,
-      url,
-      None,
-      hammockService.createTuples(
-        Parameter("symbols", Some(symbols.mkString(","))),
+              until: Option[String] = None): Future[Bars] =
+    httpService.executeGet[Bars, Unit](
+      s"${configService.getConfig.bars_url}/$timeframe",
+      httpService.createTuples(Parameter("symbols", Some(symbols.mkString(","))),
         Parameter("limit", limit),
         Parameter("start", start),
         Parameter("end", end),
@@ -62,76 +46,50 @@ private[alpaca] class AlpacaClient(configService: ConfigService,
         Parameter("until", until)
       )
     )
-  }
 
-  def getCalendar(start: Option[String] = None,
-                  end: Option[String] = None): IO[List[Calendar]] = {
-    hammockService.execute[List[Calendar], Unit](
-      Method.GET,
-      configService.getConfig.value.calendar_url,
-      None,
-      hammockService.createTuples(Parameter("start", start),
-                                  Parameter("end", end)))
-  }
+  def getCalendar(start: Option[String] = None, end: Option[String] = None): Future[List[Calendar]] =
+    httpService.executeGet[List[Calendar], Unit](
+      configService.getConfig.calendar_url,
+      httpService.createTuples(Parameter("start", start), Parameter("end", end)))
 
-  def getClock: IO[Clock] = {
-    hammockService
-      .execute[Clock, Unit](Method.GET, configService.getConfig.value.clock_url)
-  }
+  def getClock: Future[Clock] =
+    httpService.executeGet[Clock, Unit](
+      configService.getConfig.clock_url)
 
-  def getOrder(orderId: String): IO[Orders] = {
-    hammockService.execute[Orders, Unit](
-      Method.GET,
-      s"${configService.getConfig.value.order_url}/$orderId")
-  }
+  def getOrder(orderId: String): Future[Orders] =
+    httpService.executeGet[Orders, Unit](
+      s"${configService.getConfig.order_url}/$orderId")
 
-  def cancelOrder(orderId: String): Unit = {
-    hammockService.execute[String, Unit](
-      Method.DELETE,
-      s"${configService.getConfig.value.order_url}/$orderId")
-  }
+  def cancelOrder(orderId: String): Future[String] =
+    httpService.executeDelete[String, Unit](
+      s"${configService.getConfig.order_url}/$orderId")
 
-  def cancelAllOrders = {
-    hammockService.execute[String, Unit](
-      Method.DELETE,
-      s"${configService.getConfig.value.order_url}")
-  }
+  def cancelAllOrders: Future[String] =
+    httpService.executeDelete[String, Unit](
+      s"${configService.getConfig.order_url}")
 
-  def getOrders: IO[List[Orders]] = {
-    hammockService.execute[List[Orders], Unit](
-      Method.GET,
-      configService.getConfig.value.order_url)
-  }
+  def getOrders: Future[List[Orders]] =
+    httpService.executeGet[List[Orders], Unit](
+      configService.getConfig.order_url)
 
-  def placeOrder(orderRequest: OrderRequest): IO[Orders] = {
-    hammockService.execute[Orders, OrderRequest](
-      Method.POST,
-      configService.getConfig.value.order_url,
+  def placeOrder(orderRequest: OrderRequest): Future[Orders] =
+    httpService.executePost[Orders, OrderRequest](
+      configService.getConfig.order_url,
       Some(orderRequest))
-  }
 
-  def getPositions: IO[List[Position]] = {
-    hammockService.execute[List[Position], Unit](
-      Method.GET,
-      configService.getConfig.value.positions_url)
-  }
+  def getPositions: Future[List[Position]] =
+    httpService.executeGet[List[Position], Unit](
+      configService.getConfig.positions_url)
 
-  def getPosition(symbol: String): IO[Position] = {
-    hammockService.execute[Position, Unit](
-      Method.GET,
-      s"${configService.getConfig.value.positions_url}/$symbol")
-  }
+  def getPosition(symbol: String): Future[Position] =
+    httpService.executeGet[Position, Unit](
+      s"${configService.getConfig.positions_url}/$symbol")
 
-  def closePosition(symbol: String): IO[Orders] = {
-    hammockService.execute[Orders, Unit](
-      Method.DELETE,
-      s"${configService.getConfig.value.positions_url}/$symbol")
-  }
+  def closePosition(symbol: String): Future[Orders] =
+    httpService.executeDelete[Orders, Unit](
+      s"${configService.getConfig.positions_url}/$symbol")
 
-  def closeAllPositions(): IO[Unit] = {
-    hammockService.execute[Unit, Unit](
-      Method.DELETE,
-      s"${configService.getConfig.value.positions_url}")
-  }
-
+  def closeAllPositions(): Future[Unit] =
+    httpService.executeDelete[Unit, Unit](
+      s"${configService.getConfig.positions_url}")
 }

@@ -6,4 +6,4 @@ case class Trade(day: String,
                  status: String,
                  symbol: String,
                  ticks: List[Tick],
-                 `type`: String) {}
+                 `type`: String)

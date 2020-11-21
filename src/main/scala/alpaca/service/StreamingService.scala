@@ -3,21 +3,14 @@ package alpaca.service
 import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.ws.WebSocketRequest
-import akka.stream.{ActorMaterializer, OverflowStrategy}
-import akka.stream.scaladsl.{Sink, Source, SourceQueueWithComplete}
-import alpaca.dto.streaming.Polygon._
-import io.circe.{DecodingFailure, Json}
-import io.circe.generic.auto._
-import io.circe.syntax._
-import io.circe._
-import io.circe.parser._
 import akka.http.scaladsl.model.ws.{
-  BinaryMessage,
-  TextMessage,
   WebSocketRequest,
-  WebSocketUpgradeResponse,
   Message => WSMessage
+}
+import akka.stream.scaladsl.{Sink, Source, SourceQueueWithComplete}
+import akka.stream.{
+  ActorMaterializer,
+  OverflowStrategy
 }
 import alpaca.dto.streaming.Alpaca.{
   AlpacaAccountUpdate,
@@ -28,6 +21,9 @@ import alpaca.dto.streaming.Alpaca.{
   AlpacaTradeUpdate,
   Stream
 }
+import alpaca.dto.streaming.Polygon._
+import io.circe.generic.auto._
+import io.circe.{DecodingFailure, Json}
 
 import scala.concurrent.Future
 

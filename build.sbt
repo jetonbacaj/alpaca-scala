@@ -1,6 +1,6 @@
 name := "alpaca-scala"
 
-version := "3.0.0"
+version := "4.0.0"
 
 // POM settings for Sonatype
 import xerial.sbt.Sonatype._
@@ -15,49 +15,54 @@ developers := List(Developer("cynance",
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
 
-enablePlugins(MicrositesPlugin)
+//enablePlugins(MicrositesPlugin)
 
 // Add sonatype repository settings
 publishTo := sonatypePublishTo.value
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.4"
 
-val circeVersion = "0.10.0"
-val hammockVersion = "0.8.6"
+val circeVersion = "0.13.0"
+val hammockVersion = "0.11.0"
 
 libraryDependencies ++= Seq(
-  "com.pepegar" %% "hammock-core" % hammockVersion,
-  "com.pepegar" %% "hammock-circe" % hammockVersion,
-  "com.github.pureconfig" %% "pureconfig" % "0.10.1",
+//  "com.pepegar" % "hammock-core_2.12" % hammockVersion,
+//  "com.pepegar" % "hammock-circe_2.12" % hammockVersion,
+
+  "com.github.pureconfig" %% "pureconfig" % "0.14.0",
+
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-  "org.scalactic" %% "scalactic" % "3.0.5",
-  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-  "org.scalamock" %% "scalamock" % "4.1.0" % Test,
-  "com.typesafe.akka" %% "akka-http"   % "10.1.7",
-  "com.typesafe.akka" %% "akka-stream" % "2.5.19", // or whatever the latest version is,
-  "io.nats" % "jnats" % "2.2.0",
-  "org.typelevel" %% "cats-core" % "1.5.0",
+
+  "org.scalactic" %% "scalactic" % "3.2.2",
+  "org.scalatest" %% "scalatest" % "3.2.2" % "test",
+  "org.scalamock" %% "scalamock" % "5.0.0" % Test,
+
+  "com.typesafe.akka" %% "akka-http"   % "10.2.1",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.10", // or whatever the latest version is,
+
+  "io.nats" % "jnats" % "2.8.0",
+
+  "org.typelevel" %% "cats-core" % "2.2.0",
+
   "ch.qos.logback" % "logback-classic" % "1.2.3",
+
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-  "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided",
-  "com.softwaremill.macwire" %% "macrosakka" % "2.3.3" % "provided",
-  "com.softwaremill.macwire" %% "util" % "2.3.3",
-  "com.softwaremill.macwire" %% "proxy" % "2.3.3",
-  "com.beachape" %% "enumeratum" % "1.5.13",
-  "com.beachape" %% "enumeratum-circe" % "1.5.21",
-  "org.mockito" %% "mockito-scala-scalatest" % "1.5.12"
+
+  "com.softwaremill.macwire" %% "macros" % "2.3.7" % "provided",
+  "com.softwaremill.macwire" %% "macrosakka" % "2.3.7" % "provided",
+  "com.softwaremill.macwire" %% "util" % "2.3.7",
+  "com.softwaremill.macwire" %% "proxy" % "2.3.7",
+
+  "com.beachape" %% "enumeratum" % "1.6.1",
+  "com.beachape" %% "enumeratum-circe" % "1.6.1",
+  "org.mockito" %% "mockito-scala-scalatest" % "1.16.0",
+  "com.softwaremill.sttp.client3" %% "akka-http-backend"      % "3.0.0-RC7",
+  "com.softwaremill.sttp.client3" %% "circe" % "3.0.0-RC7"
+
+
 )
-
-
-libraryDependencies += {
-  val version = scalaBinaryVersion.value match {
-    case "2.10" => "1.0.3"
-    case _ ⇒ "1.6.2"
-  }
-  "com.lihaoyi" % "ammonite" % version % "test" cross CrossVersion.full
-}
 
 sourceGenerators in Test += Def.task {
   val file = (sourceManaged in Test).value / "amm.scala"
@@ -67,29 +72,29 @@ sourceGenerators in Test += Def.task {
 
 coverageExcludedPackages := ".*ConfigService.*;.*Config.*;alpaca\\.client\\..*"
 
-coverageEnabled := true
+//coverageEnabled := true
 
 
 //Microsite details
-micrositeName := "Alpaca Scala"
-micrositeDescription := "A Scala library for alpaca.markets"
-micrositeAuthor := "Cynance"
-micrositeBaseUrl := "/alpaca-scala"
-micrositeDocumentationUrl := "/alpaca-scala/docs"
-
-micrositePalette := Map(
-  "brand-primary"     -> "#000",
-  "brand-secondary"   -> "#000",
-  "brand-tertiary"    -> "#fcd600",
-  "gray-dark"         -> "#453E46",
-  "gray"              -> "#837F84",
-  "gray-light"        -> "#E3E2E3",
-  "gray-lighter"      -> "#F4F3F4",
-  "white-color"       -> "#FFFFFF")
-
-micrositePushSiteWith := GitHub4s
-
-micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
-
-micrositeGithubOwner := "cynance"
-micrositeGithubRepo := "alpaca-scala"
+//micrositeName := "Alpaca Scala"
+//micrositeDescription := "A Scala library for alpaca.markets"
+//micrositeAuthor := "Cynance"
+//micrositeBaseUrl := "/alpaca-scala"
+//micrositeDocumentationUrl := "/alpaca-scala/docs"
+//
+//micrositePalette := Map(
+//  "brand-primary"     -> "#000",
+//  "brand-secondary"   -> "#000",
+//  "brand-tertiary"    -> "#fcd600",
+//  "gray-dark"         -> "#453E46",
+//  "gray"              -> "#837F84",
+//  "gray-light"        -> "#E3E2E3",
+//  "gray-lighter"      -> "#F4F3F4",
+//  "white-color"       -> "#FFFFFF")
+//
+//micrositePushSiteWith := GitHub4s
+//
+//micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
+//
+//micrositeGithubOwner := "cynance"
+//micrositeGithubRepo := "alpaca-scala"

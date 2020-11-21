@@ -2,32 +2,30 @@ package alpaca.service
 import alpaca.dto.AlpacaAccountConfig
 import pureconfig.error.{ConfigReaderFailure, ConfigReaderFailures}
 import pureconfig.generic.auto._
-import cats._
-import cats.implicits._
 import com.typesafe.scalalogging.Logger
 
 private[alpaca] class ConfigService {
-  val logger = Logger(classOf[ConfigService])
+  private val logger: Logger = Logger(classOf[ConfigService])
 
-  var getConfig: Eval[Config] = _
+  var getConfig: Config = _
 
   def loadConfig(isPaper: Option[Boolean] = None,
                  accountKey: Option[String] = None,
-                 accountSecret: Option[String] = None): Eval[Config] = {
+                 accountSecret: Option[String] = None): Unit = {
     val alpacaAccountConfig = for {
       accountKey <- accountKey
       accountSecret <- accountSecret
       paperAccount <- isPaper
-    } yield Config(accountKey, accountSecret, paperAccount)
+    } yield Option(Config(accountKey, accountSecret, paperAccount))
 
-    getConfig = Eval.now {
-      alpacaAccountConfig
-        .orElse(loadConfigFromFile())
-        .orElse(loadConfigFromEnv())
-        .getOrElse(Config("", "", isPaper = true))
-    }
+    alpacaAccountConfig.foreach(x => {
+      logger.info(s"config resolved.  Result: $x")
 
-    getConfig
+      getConfig =
+        x.orElse(loadConfigFromFile())
+          .orElse(loadConfigFromEnv())
+          .getOrElse(Config("", "", isPaper = true))
+    })
   }
 
   private def loadConfigFromFile() = {

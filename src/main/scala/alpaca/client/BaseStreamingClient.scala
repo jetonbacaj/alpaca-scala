@@ -21,9 +21,7 @@ trait BaseStreamingClient {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   val authPromise: Promise[Boolean] = Promise[Boolean]()
 
-  def wsUrl: String = {
-    "wss://alpaca.socket.polygon.io/stocks"
-  }
+  def wsUrl: String = "wss://alpaca.socket.polygon.io/stocks"
 
   val source
     : (SourceQueueWithComplete[StreamMessage], Source[StreamMessage, NotUsed]) =

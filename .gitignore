@@ -102,3 +102,5 @@ project/plugins/project/
 
 # End of https://www.gitignore.io/api/sbt,scala,intellij
 /runTest.sh
+/.bsp/
+/.idea/

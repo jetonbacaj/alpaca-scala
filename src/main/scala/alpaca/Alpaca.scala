@@ -1,13 +1,13 @@
 package alpaca
 
-import alpaca.client.{AlpacaClient, PolygonClient, StreamingClient}
+import alpaca.client.StreamingClient
 import alpaca.dto._
 import alpaca.dto.algebra.Bars
 import alpaca.dto.polygon.{HistoricalAggregates, Trade}
 import alpaca.dto.request.OrderRequest
 import alpaca.modules.MainModule
-import alpaca.service.ConfigService
-import cats.effect.IO
+
+import scala.concurrent.Future
 
 case class Alpaca(isPaper: Option[Boolean] = None,
                   accountKey: Option[String] = None,
@@ -16,16 +16,16 @@ case class Alpaca(isPaper: Option[Boolean] = None,
 
   configService.loadConfig(isPaper, accountKey, accountSecret)
 
-  def getAccount: IO[Account] = {
+  def getAccount: Future[Account] = {
     alpacaClient.getAccount
   }
 
   def getAssets(status: Option[String] = None,
-                asset_class: Option[String] = None): IO[List[Assets]] = {
+                asset_class: Option[String] = None): Future[List[Assets]] = {
     alpacaClient.getAssets(status, asset_class)
   }
 
-  def getAsset(symbol: String): IO[Assets] = {
+  def getAsset(symbol: String): Future[Assets] = {
     alpacaClient.getAsset(symbol)
   }
 
@@ -35,16 +35,16 @@ case class Alpaca(isPaper: Option[Boolean] = None,
               start: Option[String] = None,
               end: Option[String] = None,
               after: Option[String] = None,
-              until: Option[String] = None): IO[Bars] = {
+              until: Option[String] = None): Future[Bars] = {
     alpacaClient.getBars(timeframe, symbols, limit, start, end, after, until)
   }
 
   def getCalendar(start: Option[String] = None,
-                  end: Option[String] = None): IO[List[Calendar]] = {
+                  end: Option[String] = None): Future[List[Calendar]] = {
     alpacaClient.getCalendar(start, end)
   }
 
-  def getClock: IO[Clock] = {
+  def getClock: Future[Clock] = {
     alpacaClient.getClock
   }
 
@@ -56,38 +56,38 @@ case class Alpaca(isPaper: Option[Boolean] = None,
     alpacaClient.cancelAllOrders
   }
 
-  def getOrder(orderId: String): IO[Orders] = {
+  def getOrder(orderId: String): Future[Orders] = {
     alpacaClient.getOrder(orderId)
   }
 
-  def getOrders: IO[List[Orders]] = {
+  def getOrders: Future[List[Orders]] = {
     alpacaClient.getOrders
   }
 
-  def placeOrder(orderRequest: OrderRequest): IO[Orders] = {
+  def placeOrder(orderRequest: OrderRequest): Future[Orders] = {
     alpacaClient.placeOrder(orderRequest)
   }
 
-  def getPositions: IO[List[Position]] = {
+  def getPositions: Future[List[Position]] = {
     alpacaClient.getPositions
   }
 
-  def closePosition(symbol: String): IO[Orders] = {
+  def closePosition(symbol: String): Future[Orders] = {
     alpacaClient.closePosition(symbol)
   }
 
-  def closeAllPositions: IO[Unit] = {
+  def closeAllPositions: Future[Unit] = {
     alpacaClient.closeAllPositions()
   }
 
-  def getPosition(symbol: String): IO[Position] = {
+  def getPosition(symbol: String): Future[Position] = {
     alpacaClient.getPosition(symbol)
   }
 
   def getHistoricalTrades(symbol: String,
                           date: String,
                           offset: Option[Long] = None,
-                          limit: Option[Int] = None): IO[Trade] = {
+                          limit: Option[Int] = None): Future[Trade] = {
     polygonClient.getHistoricalTrades(symbol, date, offset, limit)
   }
 
@@ -97,7 +97,7 @@ case class Alpaca(isPaper: Option[Boolean] = None,
       from: Option[String] = None,
       to: Option[String] = None,
       limit: Option[Int] = None,
-      unadjusted: Option[Boolean] = None): IO[HistoricalAggregates] = {
+      unadjusted: Option[Boolean] = None): Future[HistoricalAggregates] = {
     polygonClient.getHistoricalTradesAggregate(symbol,
                                                size,
                                                from,

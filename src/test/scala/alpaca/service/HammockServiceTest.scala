@@ -28,48 +28,48 @@ class HammockServiceTest
     with BeforeAndAfterEach
     with MockitoSugar {
 
-  var hammockService: HammockService = _
-  val configService: ConfigService = mock[ConfigService]
-  val mockConfig: Config = mock[Config]
-
-  private implicit val interpreter: Interpreter[IO] = Interpreter[IO]
-
-  override def beforeEach() {
-
-    hammockService = new HammockService(configService)
-    when(mockConfig.getBaseUrl).thenReturn("asdfasf")
-    when(configService.getConfig).thenReturn(Eval.now {
-      mockConfig
-    })
-    super.beforeEach() // To be stackable, must call super.beforeEach
-  }
-
-  "HammockService" can {
-    "execute " should {
-      "should invoke execute" in {
-        val execute = hammockService.execute[Account, Unit](Method.GET, "")
-        assert(execute.isInstanceOf[IO[Account]])
-      }
-      "should invoke execute with query params" in {
-        val execute = hammockService.execute[Account, Unit](
-          Method.GET,
-          "",
-          queryParams = Some(Array(Tuple2.apply("Test", "Test"))))
-        assert(execute.isInstanceOf[IO[Account]])
-      }
-    }
-    "createTuples" should {
-      "create tuples when args are passed " in {
-        val value = "bblah"
-        val parameter = Parameter("test", value.some)
-        val returnParams = hammockService.createTuples(parameter)
-        assert(returnParams.get(0)._1 == parameter.name)
-        assert(returnParams.get(0)._2 == value)
-      }
-      "return None when no args are passed " in {
-        val returnParams = hammockService.createTuples()
-        assert(returnParams.isEmpty)
-      }
-    }
-  }
+//  var hammockService: HammockService = _
+//  val configService: ConfigService = mock[ConfigService]
+//  val mockConfig: Config = mock[Config]
+//
+//  private implicit val interpreter: Interpreter[IO] = Interpreter[IO]
+//
+//  override def beforeEach() {
+//
+//    hammockService = new HammockService(configService)
+//    when(mockConfig.getBaseUrl).thenReturn("asdfasf")
+//    when(configService.getConfig).thenReturn(Eval.now {
+//      mockConfig
+//    })
+//    super.beforeEach() // To be stackable, must call super.beforeEach
+//  }
+//
+//  "HammockService" can {
+//    "execute " should {
+//      "should invoke execute" in {
+//        val execute = hammockService.execute[Account, Unit](Method.GET, "")
+//        assert(execute.isInstanceOf[IO[Account]])
+//      }
+//      "should invoke execute with query params" in {
+//        val execute = hammockService.execute[Account, Unit](
+//          Method.GET,
+//          "",
+//          queryParams = Some(Array(Tuple2.apply("Test", "Test"))))
+//        assert(execute.isInstanceOf[IO[Account]])
+//      }
+//    }
+//    "createTuples" should {
+//      "create tuples when args are passed " in {
+//        val value = "bblah"
+//        val parameter = Parameter("test", value.some)
+//        val returnParams = hammockService.createTuples(parameter)
+//        assert(returnParams.get(0)._1 == parameter.name)
+//        assert(returnParams.get(0)._2 == value)
+//      }
+//      "return None when no args are passed " in {
+//        val returnParams = hammockService.createTuples()
+//        assert(returnParams.isEmpty)
+//      }
+//    }
+//  }
 }

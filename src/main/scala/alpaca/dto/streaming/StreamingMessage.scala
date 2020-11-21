@@ -1,15 +1,11 @@
 package alpaca.dto.streaming
 
 import alpaca.dto.Orders
-import alpaca.dto.streaming.Polygon.{
-  PolygonAggregatePerSecondSubscribe,
-  PolygonClientStreamMessage
-}
 import enumeratum._
-import io.circe.{Encoder, Json}
 import io.circe.syntax._
-import io.circe._
-import io.circe.parser._
+import io.circe.{Encoder, Json}
+
+import scala.collection.immutable
 
 sealed trait StreamMessage
 
@@ -28,7 +24,7 @@ object Polygon {
     case object AM extends Ev
     case object status extends Ev
 
-    val values = findValues
+    val values: immutable.IndexedSeq[Ev] = findValues
 
   }
 
@@ -107,61 +103,44 @@ object Polygon {
   case class PolygonAuthMessage(key: String) extends PolygonClientStreamMessage
 
   implicit val encodePolygonTradeSubscribe: Encoder[PolygonTradeSubscribe] =
-    new Encoder[PolygonTradeSubscribe] {
-      override def apply(a: PolygonTradeSubscribe): Json = Json.obj(
-        ("action", Json.fromString("subscribe")),
-        ("params", Json.fromString(s"T.${a.symbol}"))
-      )
-    }
+    (a: PolygonTradeSubscribe) => Json.obj(
+      ("action", Json.fromString("subscribe")),
+      ("params", Json.fromString(s"T.${a.symbol}"))
+    )
 
   implicit val encodePolygonQuoteSubscribe: Encoder[PolygonQuoteSubscribe] =
-    new Encoder[PolygonQuoteSubscribe] {
-      override def apply(a: PolygonQuoteSubscribe): Json = Json.obj(
-        ("action", Json.fromString("subscribe")),
-        ("params", Json.fromString(s"Q.${a.symbol}"))
-      )
-    }
+    (a: PolygonQuoteSubscribe) => Json.obj(
+      ("action", Json.fromString("subscribe")),
+      ("params", Json.fromString(s"Q.${a.symbol}"))
+    )
 
   implicit val encodePolygonAggregatePerMinuteSubscribe
     : Encoder[PolygonAggregatePerMinuteSubscribe] =
-    new Encoder[PolygonAggregatePerMinuteSubscribe] {
-      override def apply(a: PolygonAggregatePerMinuteSubscribe): Json =
-        Json.obj(
-          ("action", Json.fromString("subscribe")),
-          ("params", Json.fromString(s"AM.${a.symbol}"))
-        )
-    }
+    (a: PolygonAggregatePerMinuteSubscribe) => Json.obj(
+      ("action", Json.fromString("subscribe")),
+      ("params", Json.fromString(s"AM.${a.symbol}"))
+    )
 
   implicit val encodePolygonAggregatePerSecondSubscribe
     : Encoder[PolygonAggregatePerSecondSubscribe] =
-    new Encoder[PolygonAggregatePerSecondSubscribe] {
-      override def apply(a: PolygonAggregatePerSecondSubscribe): Json =
-        Json.obj(
-          ("action", Json.fromString("subscribe")),
-          ("params", Json.fromString(s"A.${a.symbol}"))
-        )
-    }
+    (a: PolygonAggregatePerSecondSubscribe) => Json.obj(
+      ("action", Json.fromString("subscribe")),
+      ("params", Json.fromString(s"A.${a.symbol}"))
+    )
 
   implicit val encodePolygonAuthMessage: Encoder[PolygonAuthMessage] =
-    new Encoder[PolygonAuthMessage] {
-      override def apply(a: PolygonAuthMessage): Json =
-        Json.obj(
-          ("action", Json.fromString("auth")),
-          ("params", Json.fromString(a.key))
-        )
-    }
+    (a: PolygonAuthMessage) => Json.obj(
+      ("action", Json.fromString("auth")),
+      ("params", Json.fromString(a.key))
+    )
 
   implicit val PolygonClientStreamMessage: Encoder[PolygonClientStreamMessage] =
-    new Encoder[PolygonClientStreamMessage] {
-      override def apply(a: PolygonClientStreamMessage): Json = {
-        a match {
-          case t: PolygonTradeSubscribe               => t.asJson
-          case q: PolygonQuoteSubscribe               => q.asJson
-          case am: PolygonAggregatePerMinuteSubscribe => am.asJson
-          case a: PolygonAggregatePerSecondSubscribe  => a.asJson
-          case aum: PolygonAuthMessage                => aum.asJson
-        }
-      }
+    {
+      case t: PolygonTradeSubscribe => t.asJson
+      case q: PolygonQuoteSubscribe => q.asJson
+      case am: PolygonAggregatePerMinuteSubscribe => am.asJson
+      case a: PolygonAggregatePerSecondSubscribe => a.asJson
+      case aum: PolygonAuthMessage => aum.asJson
     }
 }
 
@@ -176,7 +155,7 @@ object Alpaca {
     case object listening extends Stream
     case object authorization extends Stream
 
-    val values = findValues
+    val values: immutable.IndexedSeq[Stream] = findValues
 
   }
 
@@ -221,69 +200,53 @@ object Alpaca {
       extends AlpacaClientStreamMessage
 
   implicit val encodeAlpacaAuthenticate: Encoder[AlpacaAuthenticate] =
-    new Encoder[AlpacaAuthenticate] {
-      override def apply(a: AlpacaAuthenticate): Json =
+    (a: AlpacaAuthenticate) => Json.obj(
+      ("action", Json.fromString("authenticate")),
+      ("data",
         Json.obj(
-          ("action", Json.fromString("authenticate")),
-          ("data",
-           Json.obj(
-             ("key_id", Json.fromString(a.key_id)),
-             ("secret_key", Json.fromString(a.secret_key))
-           ))
-        )
-    }
+          ("key_id", Json.fromString(a.key_id)),
+          ("secret_key", Json.fromString(a.secret_key))
+        ))
+    )
 
   implicit val encodeAlpacaTradeUpdatesSubscribe
     : Encoder[AlpacaTradeUpdatesSubscribe] =
-    new Encoder[AlpacaTradeUpdatesSubscribe] {
-      override def apply(a: AlpacaTradeUpdatesSubscribe): Json =
+    (_: AlpacaTradeUpdatesSubscribe) => Json.obj(
+      ("action", Json.fromString("listen")),
+      ("data",
         Json.obj(
-          ("action", Json.fromString("listen")),
-          ("data",
-           Json.obj(
-             ("streams", Json.arr(Json.fromString("trade_updates")))
-           ))
-        )
-    }
+          ("streams", Json.arr(Json.fromString("trade_updates")))
+        ))
+    )
 
   implicit val encodeAlpacaAccountUpdatesSubscribe
     : Encoder[AlpacaAccountUpdatesSubscribe] =
-    new Encoder[AlpacaAccountUpdatesSubscribe] {
-      override def apply(a: AlpacaAccountUpdatesSubscribe): Json =
+    (_: AlpacaAccountUpdatesSubscribe) => Json.obj(
+      ("action", Json.fromString("listen")),
+      ("data",
         Json.obj(
-          ("action", Json.fromString("listen")),
-          ("data",
-           Json.obj(
-             ("streams", Json.arr(Json.fromString("account_updates")))
-           ))
-        )
-    }
+          ("streams", Json.arr(Json.fromString("account_updates")))
+        ))
+    )
 
   implicit val encodeAlpacaAccountAndTradeUpdates
     : Encoder[AlpacaAccountAndTradeUpdates] =
-    new Encoder[AlpacaAccountAndTradeUpdates] {
-      override def apply(a: AlpacaAccountAndTradeUpdates): Json =
+    (_: AlpacaAccountAndTradeUpdates) => Json.obj(
+      ("action", Json.fromString("listen")),
+      ("data",
         Json.obj(
-          ("action", Json.fromString("listen")),
-          ("data",
-           Json.obj(
-             ("streams",
-              Json.arr(Json.fromString("account_updates"),
-                       Json.fromString("trade_updates")))
-           ))
-        )
-    }
+          ("streams",
+            Json.arr(Json.fromString("account_updates"),
+              Json.fromString("trade_updates")))
+        ))
+    )
 
   implicit val AlpacaClientStreamMessage: Encoder[AlpacaClientStreamMessage] =
-    new Encoder[AlpacaClientStreamMessage] {
-      override def apply(a: AlpacaClientStreamMessage): Json = {
-        a match {
-          case msg: AlpacaAccountUpdatesSubscribe => msg.asJson
-          case msg: AlpacaTradeUpdatesSubscribe   => msg.asJson
-          case msg: AlpacaAccountAndTradeUpdates  => msg.asJson
-          case msg: AlpacaAuthenticate            => msg.asJson
-        }
-      }
+    {
+      case msg: AlpacaAccountUpdatesSubscribe => msg.asJson
+      case msg: AlpacaTradeUpdatesSubscribe => msg.asJson
+      case msg: AlpacaAccountAndTradeUpdates => msg.asJson
+      case msg: AlpacaAuthenticate => msg.asJson
     }
 
 }

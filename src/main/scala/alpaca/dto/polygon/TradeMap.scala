@@ -7,4 +7,4 @@ case class TradeMap(c1: String,
                     e: String,
                     p: String,
                     s: String,
-                    t: String) {}
+                    t: String)

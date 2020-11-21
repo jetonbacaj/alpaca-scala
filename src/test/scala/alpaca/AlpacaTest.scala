@@ -3,12 +3,9 @@ package alpaca
 import alpaca.client.{AlpacaClient, PolygonClient}
 import alpaca.dto.request.OrderRequest
 import alpaca.modules.MainModule
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import org.scalatest.{BeforeAndAfterEach, FunSuite, WordSpec}
-import cats._
 import cats.implicits._
-
-import scala.util.Failure
+import org.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, WordSpec}
 
 class AlpacaTest extends WordSpec with BeforeAndAfterEach with MockitoSugar {
 
